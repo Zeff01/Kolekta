@@ -18,12 +18,22 @@ export function useLazyLoad<T extends HTMLElement>(
   } = options;
 
   const elementRef = useRef<T>(null);
-  const [isVisible, setIsVisible] = useState(false);
+  // Start with true to ensure cards are visible by default
+  // This prevents issues with SSR and ensures content is always accessible
+  const [isVisible, setIsVisible] = useState(true);
   const [hasTriggered, setHasTriggered] = useState(false);
 
   useEffect(() => {
+    // Check if IntersectionObserver is available (browser only)
+    if (typeof window === 'undefined' || !('IntersectionObserver' in window)) {
+      return;
+    }
+
     const element = elementRef.current;
     if (!element || (triggerOnce && hasTriggered)) return;
+
+    // Set to false initially, then let observer handle visibility
+    setIsVisible(false);
 
     const observer = new IntersectionObserver(
       (entries) => {
