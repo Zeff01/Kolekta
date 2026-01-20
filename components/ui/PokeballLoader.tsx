@@ -10,7 +10,7 @@ export default function PokeballLoader({ message = 'Loading...' }: PokeballLoade
   return (
     <div className="flex flex-col items-center justify-center py-8 sm:py-16">
       <div
-        className="mb-6 sm:mb-8 relative overflow-hidden w-[280px] h-[280px] sm:w-[420px] sm:h-[420px]"
+        className="relative overflow-hidden w-[280px] h-[280px] sm:w-[420px] sm:h-[420px]"
         style={{ maxWidth: '85vw', maxHeight: '85vw' }}
       >
         <div
@@ -31,10 +31,14 @@ export default function PokeballLoader({ message = 'Loading...' }: PokeballLoade
             style={{ mixBlendMode: 'normal' }}
           />
         </div>
+
+        {/* Floating text at bottom of image */}
+        <div className="absolute bottom-4 left-0 right-0 flex justify-center">
+          <p className="text-sm sm:text-lg font-pixel text-retro-black dark:text-retro-white uppercase animate-pulse bg-retro-white/80 dark:bg-retro-black/80 px-4 py-2 border-2 border-retro-black shadow-pixel">
+            {message}
+          </p>
+        </div>
       </div>
-      <p className="text-sm sm:text-lg font-pixel text-retro-black dark:text-retro-white uppercase animate-pulse">
-        {message}
-      </p>
     </div>
   );
 }
