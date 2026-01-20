@@ -32,6 +32,9 @@ export default function PokeballLoader({ message = 'Loading...' }: PokeballLoade
           />
         </div>
 
+        {/* Cover watermark at bottom left */}
+        <div className="absolute bottom-0 left-0 w-32 h-8 bg-retro-black" />
+
         {/* Floating text at bottom of image */}
         <div className="absolute bottom-4 left-0 right-0 flex justify-center">
           <p className="text-sm sm:text-lg font-pixel text-retro-black dark:text-retro-white uppercase animate-pulse bg-retro-white/80 dark:bg-retro-black/80 px-4 py-2 border-2 border-retro-black shadow-pixel">
