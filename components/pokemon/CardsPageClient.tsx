@@ -27,6 +27,7 @@ export default function CardsPageClient({ cards: initialCards }: CardsPageClient
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [isSearching, setIsSearching] = useState(false);
+  const [isFiltering, setIsFiltering] = useState(false);
   const [searchPage, setSearchPage] = useState(1);
   const [hasMoreSearchResults, setHasMoreSearchResults] = useState(true);
 
@@ -129,7 +130,11 @@ export default function CardsPageClient({ cards: initialCards }: CardsPageClient
       // Skip if we're in search mode
       if (searchQuery) return;
 
+      // Set filtering state immediately and clear cards
+      setIsFiltering(true);
+      setAllCards([]);
       setIsLoading(true);
+
       try {
         const response = await fetchCardsClient({
           page: 1,
@@ -145,6 +150,7 @@ export default function CardsPageClient({ cards: initialCards }: CardsPageClient
         console.error('Error fetching filtered cards:', error);
       } finally {
         setIsLoading(false);
+        setIsFiltering(false);
       }
     };
 
@@ -153,6 +159,7 @@ export default function CardsPageClient({ cards: initialCards }: CardsPageClient
       fetchFilteredCards();
     } else if (!searchQuery) {
       // Reset to initial cards when filters are cleared
+      setIsFiltering(false);
       setAllCards(initialCards);
       setCurrentPage(1);
       setHasMore(true);
@@ -292,6 +299,8 @@ export default function CardsPageClient({ cards: initialCards }: CardsPageClient
         {/* Cards Display */}
         {isSearching ? (
           <PokeballLoader message="Searching cards..." />
+        ) : isFiltering ? (
+          <PokeballLoader message="Filtering cards..." />
         ) : isLoading && filteredAndSortedCards.length === 0 ? (
           <PokeballLoader message="Loading cards..." />
         ) : filteredAndSortedCards.length === 0 ? (
