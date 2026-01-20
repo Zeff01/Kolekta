@@ -227,7 +227,7 @@ export default function PriceGraph({ cardId, variant, initialPrice, conditionFil
                 borderRadius: '8px',
                 color: '#F9FAFB',
               }}
-              formatter={(value: number) => [formatPrice(value), 'Price']}
+              formatter={(value: number | undefined) => [formatPrice(value || 0), 'Price']}
               labelStyle={{ color: '#9CA3AF' }}
             />
             <Line

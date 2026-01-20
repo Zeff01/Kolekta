@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
       try {
         const { data: card } = await pokemonAPI.getCard(id);
 
-        // Save prices for each variant that exists
+        // Save prices for each variant that exists (API v2 structure)
         const variants: Array<'normal' | 'holofoil' | 'reverseHolofoil' | 'firstEdition'> = [
           'normal',
           'holofoil',
@@ -48,9 +48,9 @@ export async function POST(request: NextRequest) {
         ];
 
         for (const variant of variants) {
-          const priceData = card.tcgplayer?.[variant];
+          const priceData = card.tcgplayer?.prices?.[variant];
 
-          if (priceData && priceData.marketPrice) {
+          if (priceData && (priceData.market || priceData.marketPrice)) {
             // Check if we already have a price for today
             const existingPrice = await CardPrice.findOne({
               cardId: card.id,
@@ -59,17 +59,18 @@ export async function POST(request: NextRequest) {
             });
 
             if (!existingPrice) {
+              const marketPrice = priceData.market || priceData.marketPrice || 0;
               const newPrice = new CardPrice({
                 cardId: card.id,
                 cardName: card.name,
                 setId: card.set.id,
                 setName: card.set.name,
                 variant,
-                marketPrice: priceData.marketPrice,
-                lowPrice: priceData.lowPrice || priceData.marketPrice,
-                midPrice: priceData.midPrice || priceData.marketPrice,
-                highPrice: priceData.highPrice || priceData.marketPrice,
-                directLowPrice: priceData.directLowPrice,
+                marketPrice: marketPrice,
+                lowPrice: priceData.low || priceData.lowPrice || marketPrice,
+                midPrice: priceData.mid || priceData.midPrice || marketPrice,
+                highPrice: priceData.high || priceData.highPrice || marketPrice,
+                directLowPrice: priceData.directLow || priceData.directLowPrice,
                 date: today,
               });
 
@@ -78,7 +79,7 @@ export async function POST(request: NextRequest) {
                 cardId: card.id,
                 cardName: card.name,
                 variant,
-                price: priceData.marketPrice,
+                price: marketPrice,
               });
             }
           }

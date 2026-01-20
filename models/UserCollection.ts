@@ -20,7 +20,7 @@ export interface IWishlistItem {
   addedAt: Date;
 }
 
-export interface IUserCollection extends Document {
+export interface IUserCollection extends Omit<Document, 'collection'> {
   userId: mongoose.Types.ObjectId;
   collection: ICollectionItem[];
   wishlist: IWishlistItem[];

@@ -567,7 +567,7 @@ export default function CollectionButtons({ card }: CollectionButtonsProps) {
                             updateGrading(card.id, { company, grade: collectionItem.grading!.grade });
                           }}
                           className={`px-3 py-2 border-2 border-retro-black text-xs font-pixel uppercase transition-all ${
-                            collectionItem.grading.company === company
+                            collectionItem.grading!.company === company
                               ? 'bg-retro-yellow text-retro-black shadow-pixel'
                               : 'bg-retro-white dark:bg-retro-black text-retro-black dark:text-retro-white hover:shadow-pixel'
                           }`}

@@ -1,4 +1,4 @@
-import { PokemonCard, PokemonSet, ApiResponse } from "@/types/pokemon";
+import { PokemonCard, PokemonSet, ApiResponse, TCGPlayerPricing } from "@/types/pokemon";
 import { PokemonTCG } from "pokemon-tcg-sdk-typescript";
 
 // Using pokemontcg.io API - complete card data
@@ -87,7 +87,7 @@ class PokemonTCGAPI {
       name: card.name,
       supertype: card.supertype,
       subtypes: card.subtypes || [],
-      level: card.level,
+      level: (card as { level?: string }).level,
       hp: card.hp,
       types: card.types || [],
       evolvesFrom: card.evolvesFrom,
@@ -125,7 +125,7 @@ class PokemonTCGAPI {
         small: card.images.small,
         large: card.images.large,
       },
-      tcgplayer: card.tcgplayer,
+      tcgplayer: card.tcgplayer as unknown as TCGPlayerPricing,
     };
   }
 
@@ -166,8 +166,8 @@ class PokemonTCGAPI {
     try {
       const response = await PokemonTCG.findCardsByQueries({
         q: 'supertype:pokemon', // Only fetch Pokemon cards, not trainers/energy
-        pageSize: pageSize.toString(),
-        page: page.toString(),
+        pageSize: pageSize,
+        page: page,
       });
 
       const duration = Date.now() - startTime;
@@ -253,8 +253,8 @@ class PokemonTCGAPI {
 
       const response = await PokemonTCG.findCardsByQueries({
         q: query,
-        pageSize: pageSize.toString(),
-        page: page.toString(),
+        pageSize: pageSize,
+        page: page,
       });
 
       const duration = Date.now() - startTime;
@@ -291,7 +291,7 @@ class PokemonTCGAPI {
     try {
       const response = await PokemonTCG.findCardsByQueries({
         q: `set.id:${setId}`,
-        pageSize: pageSize.toString(),
+        pageSize: pageSize,
         orderBy: 'number', // Order by card number in set
       });
 
@@ -399,8 +399,8 @@ class PokemonTCGAPI {
     try {
       const response = await PokemonTCG.findCardsByQueries({
         q: `types:${type}`,
-        pageSize: pageSize.toString(),
-        page: page.toString(),
+        pageSize: pageSize,
+        page: page,
       });
 
       const mappedCards = response.map(card => this.mapCard(card));
@@ -423,8 +423,8 @@ class PokemonTCGAPI {
     try {
       const response = await PokemonTCG.findCardsByQueries({
         q: `rarity:"${rarity}"`,
-        pageSize: pageSize.toString(),
-        page: page.toString(),
+        pageSize: pageSize,
+        page: page,
       });
 
       const mappedCards = response.map(card => this.mapCard(card));
@@ -447,8 +447,8 @@ class PokemonTCGAPI {
     try {
       const response = await PokemonTCG.findCardsByQueries({
         q: `supertype:${supertype}`,
-        pageSize: pageSize.toString(),
-        page: page.toString(),
+        pageSize: pageSize,
+        page: page,
       });
 
       const mappedCards = response.map(card => this.mapCard(card));

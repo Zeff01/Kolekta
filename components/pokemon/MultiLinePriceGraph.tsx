@@ -172,9 +172,9 @@ export default function MultiLinePriceGraph({ cardId, variant, visibleLines, lin
                 borderRadius: '8px',
                 color: '#F9FAFB',
               }}
-              formatter={(value: number, name: string) => {
+              formatter={(value: number | undefined, name: string | undefined) => {
                 const config = lineConfigs.find(c => c.id === name);
-                return [formatPrice(value), config?.label || name];
+                return [formatPrice(value || 0), config?.label || name || ''];
               }}
               labelStyle={{ color: '#9CA3AF' }}
             />

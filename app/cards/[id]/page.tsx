@@ -37,13 +37,14 @@ export default async function CardDetailPage({ params }: CardDetailPageProps) {
   // Get the primary variant for price graph (prefer holofoil, then normal)
   const primaryVariant = card.tcgplayer?.prices?.holofoil ? 'holofoil'
     : card.tcgplayer?.prices?.normal ? 'normal'
-    : card.tcgplayer?.prices ? Object.keys(card.tcgplayer.prices)[0]
+    : card.tcgplayer?.prices ? Object.keys(card.tcgplayer.prices)[0] as keyof typeof card.tcgplayer.prices
     : 'normal';
 
-  const initialPrice = card.tcgplayer?.prices?.[primaryVariant]?.market
-    || card.tcgplayer?.prices?.[primaryVariant]?.marketPrice
-    || card.tcgplayer?.prices?.[primaryVariant]?.mid
-    || card.tcgplayer?.prices?.[primaryVariant]?.midPrice
+  const priceVariant = card.tcgplayer?.prices?.[primaryVariant as keyof typeof card.tcgplayer.prices];
+  const initialPrice = priceVariant?.market
+    || priceVariant?.marketPrice
+    || priceVariant?.mid
+    || priceVariant?.midPrice
     || 0;
 
   return (
