@@ -11,7 +11,7 @@ export default function PokeballLoader({ message = 'Loading...' }: PokeballLoade
     <div className="flex flex-col items-center justify-center py-16 sm:py-20">
       <div className="mb-8 relative w-40 h-40 sm:w-48 sm:h-48">
         <Image
-          src="/pokeball-animation.gif"
+          src="/pokeball-animation.webp"
           alt="Loading..."
           width={192}
           height={192}
