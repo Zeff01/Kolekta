@@ -80,6 +80,7 @@ function AnimatedCard({ card, index }: AnimatedCardProps) {
         onMouseLeave={handleMouseLeave}
       >
         <div
+          className="relative w-full h-full"
           style={{
             transform: isHovering ? 'translateZ(20px)' : 'translateZ(0px)',
             transition: 'transform 0.1s ease-out',

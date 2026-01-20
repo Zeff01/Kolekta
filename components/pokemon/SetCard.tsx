@@ -82,6 +82,7 @@ export default function SetCard({ set, index = 0 }: SetCardProps) {
         onMouseLeave={handleMouseLeave}
       >
         <div
+          className="relative w-full h-full"
           style={{
             transform: isHovering ? 'translateZ(15px)' : 'translateZ(0px)',
             transition: 'transform 0.1s ease-out',
