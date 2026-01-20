@@ -36,7 +36,12 @@ export default function CardsPageClient({ cards: initialCards }: CardsPageClient
     setIsLoading(true);
     try {
       const nextPage = currentPage + 1;
-      const response = await fetchCardsClient({ page: nextPage, pageSize: 50 });
+      const response = await fetchCardsClient({
+        page: nextPage,
+        pageSize: 50,
+        type: selectedType !== 'all' ? selectedType : '',
+        rarity: selectedRarity !== 'all' ? selectedRarity : '',
+      });
 
       if (response.data.length === 0) {
         setHasMore(false);
@@ -49,7 +54,7 @@ export default function CardsPageClient({ cards: initialCards }: CardsPageClient
     } finally {
       setIsLoading(false);
     }
-  }, [currentPage, isLoading, hasMore]);
+  }, [currentPage, isLoading, hasMore, selectedType, selectedRarity]);
 
   // Load more search results
   const loadMoreSearchResults = useCallback(async () => {
@@ -117,24 +122,62 @@ export default function CardsPageClient({ cards: initialCards }: CardsPageClient
     return () => clearTimeout(debounceTimer);
   }, [searchQuery, initialCards]);
 
-  // Get unique types for filter dropdown
-  const allTypes = useMemo(() => {
-    const typesSet = new Set<string>();
-    allCards.forEach(card => {
-      card.types?.forEach(type => typesSet.add(type));
-    });
-    return Array.from(typesSet).sort().map(type => ({ value: type, label: type }));
-  }, [allCards]);
+  // Handle type filter change - fetch filtered cards from server
+  useEffect(() => {
+    const fetchFilteredCards = async () => {
+      // Skip if we're in search mode
+      if (searchQuery) return;
 
-  // Get unique rarities for filter dropdown
+      setIsLoading(true);
+      try {
+        const response = await fetchCardsClient({
+          page: 1,
+          pageSize: 50,
+          type: selectedType !== 'all' ? selectedType : '',
+          rarity: selectedRarity !== 'all' ? selectedRarity : '',
+        });
+
+        setAllCards(response.data);
+        setCurrentPage(1);
+        setHasMore(response.data.length === 50); // If we got full page, there might be more
+      } catch (error) {
+        console.error('Error fetching filtered cards:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    // Only fetch if not using initial cards (user has changed filters)
+    if (selectedType !== 'all' || selectedRarity !== 'all') {
+      fetchFilteredCards();
+    } else if (!searchQuery) {
+      // Reset to initial cards when filters are cleared
+      setAllCards(initialCards);
+      setCurrentPage(1);
+      setHasMore(true);
+    }
+  }, [selectedType, selectedRarity, searchQuery, initialCards]);
+
+  // All possible Pokemon types (static list for filter dropdown)
+  const allTypes = useMemo(() => {
+    const pokemonTypes = [
+      'Colorless', 'Darkness', 'Dragon', 'Fairy', 'Fighting',
+      'Fire', 'Grass', 'Lightning', 'Metal', 'Psychic', 'Water'
+    ];
+    return pokemonTypes.map(type => ({ value: type, label: type }));
+  }, []);
+
+  // All possible rarities (static list for filter dropdown)
   const allRarities = useMemo(() => {
-    const raritiesSet = new Set(
-      allCards
-        .map(card => card.rarity)
-        .filter(Boolean)
-    );
-    return Array.from(raritiesSet).sort().map(rarity => ({ value: rarity!, label: rarity! }));
-  }, [allCards]);
+    const rarities = [
+      'Common', 'Uncommon', 'Rare', 'Rare Holo', 'Rare Holo EX',
+      'Rare Holo GX', 'Rare Holo V', 'Rare Holo VMAX', 'Rare Holo VSTAR',
+      'Rare Ultra', 'Rare Secret', 'Rare Rainbow', 'Rare Shiny',
+      'Promo', 'Amazing Rare', 'Radiant Rare', 'Illustration Rare',
+      'Special Illustration Rare', 'Hyper Rare'
+    ];
+    return rarities.map(rarity => ({ value: rarity, label: rarity }));
+  }, []);
 
   // Sort options
   const sortOptions = [
@@ -148,28 +191,13 @@ export default function CardsPageClient({ cards: initialCards }: CardsPageClient
     { value: 'number-desc', label: 'Number (High to Low)' },
   ];
 
-  // Filter and sort cards
+  // Sort cards (filtering is now done server-side)
   const filteredAndSortedCards = useMemo(() => {
-    let filtered = allCards;
-
-    // Note: Search is now handled server-side, no need for client-side search filter
-
-    // Apply type filter
-    if (selectedType !== 'all') {
-      filtered = filtered.filter(card =>
-        card.types?.includes(selectedType)
-      );
-    }
-
-    // Apply rarity filter
-    if (selectedRarity !== 'all') {
-      filtered = filtered.filter(card =>
-        card.rarity === selectedRarity
-      );
-    }
+    // All filtering is now handled server-side in the API
+    // We only need to sort the results here
 
     // Apply sorting
-    const sorted = [...filtered].sort((a, b) => {
+    const sorted = [...allCards].sort((a, b) => {
       switch (sortBy) {
         case 'set-newest':
           // Sort by set ID (newer sets have higher prefixes like sv, swsh, sm, xy, bw)
@@ -199,7 +227,7 @@ export default function CardsPageClient({ cards: initialCards }: CardsPageClient
     });
 
     return sorted;
-  }, [allCards, searchQuery, selectedType, selectedRarity, sortBy]);
+  }, [allCards, sortBy]);
 
   return (
     <div className="min-h-screen bg-retro-white dark:bg-retro-black">

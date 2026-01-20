@@ -463,6 +463,32 @@ class PokemonTCGAPI {
     }
   }
 
+  async getCardsByTypeAndRarity(type: string, rarity: string, options: FetchOptions = {}): Promise<ApiResponse<PokemonCard[]>> {
+    const { pageSize = 50, page = 1 } = options;
+
+    console.log(`[PokemonTCG API] Fetching cards by type: ${type} and rarity: ${rarity}`);
+
+    try {
+      const response = await PokemonTCG.findCardsByQueries({
+        q: `types:${type} rarity:"${rarity}"`,
+        pageSize: pageSize,
+        page: page,
+      });
+
+      const mappedCards = response.map(card => this.mapCard(card));
+
+      return {
+        data: mappedCards,
+        count: mappedCards.length,
+        page,
+        pageSize,
+      };
+    } catch (error) {
+      console.error(`[PokemonTCG API] Error fetching cards by type ${type} and rarity ${rarity}:`, error);
+      throw error;
+    }
+  }
+
   // Cache management methods
   getCacheStats() {
     return apiCache.getStats();
