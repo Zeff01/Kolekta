@@ -7,6 +7,7 @@ import SearchInput from "@/components/ui/SearchInput";
 import FilterSelect from "@/components/ui/FilterSelect";
 import SortSelect from "@/components/ui/SortSelect";
 import CardGridSkeleton from "@/components/ui/CardGridSkeleton";
+import PokeballLoader from "@/components/ui/PokeballLoader";
 import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
 import { fetchCardsClient } from "@/lib/pokemon-api-client";
 
@@ -290,14 +291,9 @@ export default function CardsPageClient({ cards: initialCards }: CardsPageClient
 
         {/* Cards Display */}
         {isSearching ? (
-          <div className="mt-6 sm:mt-8">
-            <div className="mb-3 sm:mb-4 text-center">
-              <div className="inline-block bg-retro-black dark:bg-retro-white text-retro-white dark:text-retro-black px-4 sm:px-6 py-2 sm:py-3 border-2 sm:border-3 border-retro-black shadow-pixel">
-                <p className="text-[10px] sm:text-xs font-pixel uppercase animate-pulse">Searching cards...</p>
-              </div>
-            </div>
-            <CardGridSkeleton count={12} />
-          </div>
+          <PokeballLoader message="Searching cards..." />
+        ) : isLoading && filteredAndSortedCards.length === 0 ? (
+          <PokeballLoader message="Loading cards..." />
         ) : filteredAndSortedCards.length === 0 ? (
           <div className="text-center py-12 sm:py-16">
             <p className="text-xs sm:text-sm font-pixel text-retro-gray dark:text-retro-gray-light">
@@ -310,15 +306,10 @@ export default function CardsPageClient({ cards: initialCards }: CardsPageClient
           <>
             <CardGrid cards={filteredAndSortedCards} />
 
-            {/* Loading indicator with skeleton */}
+            {/* Loading indicator */}
             {isLoading && (
               <div className="mt-6 sm:mt-8">
-                <div className="mb-3 sm:mb-4 text-center">
-                  <div className="inline-block bg-retro-black dark:bg-retro-white text-retro-white dark:text-retro-black px-4 sm:px-6 py-2 sm:py-3 border-2 sm:border-3 border-retro-black shadow-pixel">
-                    <p className="text-[10px] sm:text-xs font-pixel uppercase animate-pulse">Loading more cards...</p>
-                  </div>
-                </div>
-                <CardGridSkeleton count={12} />
+                <PokeballLoader message="Loading more cards..." />
               </div>
             )}
 
