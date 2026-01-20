@@ -8,12 +8,20 @@ interface PokeballLoaderProps {
 
 export default function PokeballLoader({ message = 'Loading...' }: PokeballLoaderProps) {
   return (
-    <div className="flex flex-col items-center justify-center py-16 sm:py-20">
+    <div className="flex flex-col items-center justify-center py-8 sm:py-16">
       <div
-        className="mb-8 relative overflow-hidden"
-        style={{ width: '420px', height: '420px', maxWidth: '90vw', maxHeight: '90vw' }}
+        className="mb-6 sm:mb-8 relative overflow-hidden w-[280px] h-[280px] sm:w-[420px] sm:h-[420px]"
+        style={{ maxWidth: '85vw', maxHeight: '85vw' }}
       >
-        <div style={{ width: '480px', height: '480px', position: 'absolute', top: '-30px', left: '-30px' }}>
+        <div
+          className="absolute"
+          style={{
+            width: 'calc(100% * 480 / 420)',
+            height: 'calc(100% * 480 / 420)',
+            top: 'calc(-30px * 100% / 420)',
+            left: 'calc(-30px * 100% / 420)'
+          }}
+        >
           <Image
             src="/pokeball-animation.webp"
             alt="Loading..."
@@ -24,7 +32,7 @@ export default function PokeballLoader({ message = 'Loading...' }: PokeballLoade
           />
         </div>
       </div>
-      <p className="text-lg sm:text-xl font-pixel text-retro-black dark:text-retro-white uppercase animate-pulse">
+      <p className="text-sm sm:text-lg font-pixel text-retro-black dark:text-retro-white uppercase animate-pulse">
         {message}
       </p>
     </div>
