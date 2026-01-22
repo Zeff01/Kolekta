@@ -126,6 +126,14 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
             <span className="inline-block group-hover:animate-bounce">⭐</span> Wishlist
           </Link>
 
+          <Link
+            href="/marketplace"
+            onClick={handleClose}
+            className="group px-4 py-3 bg-purple-600 text-retro-white border-2 border-retro-black font-pixel text-xs uppercase hover:bg-purple-700 transition-all hover:translate-x-1"
+          >
+            <span className="inline-block group-hover:animate-bounce">🏪</span> Marketplace
+          </Link>
+
           {/* Divider */}
           <div className="h-px bg-retro-white opacity-30 my-2"></div>
 

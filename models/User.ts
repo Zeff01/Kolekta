@@ -6,6 +6,13 @@ export interface IUser extends Document {
   username: string;
   password: string;
   currency?: 'USD' | 'PHP';
+  paymentInfo?: {
+    gcashNumber?: string;
+    gcashQR?: string; // URL to uploaded QR image
+    bankName?: string;
+    bankAccountNumber?: string;
+    bankAccountName?: string;
+  };
   createdAt: Date;
   updatedAt: Date;
   comparePassword(candidatePassword: string): Promise<boolean>;
@@ -37,6 +44,13 @@ const UserSchema = new Schema<IUser>({
     type: String,
     enum: ['USD', 'PHP'],
     default: 'USD',
+  },
+  paymentInfo: {
+    gcashNumber: String,
+    gcashQR: String, // URL to uploaded QR image
+    bankName: String,
+    bankAccountNumber: String,
+    bankAccountName: String,
   },
 }, {
   timestamps: true,

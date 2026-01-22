@@ -8,8 +8,9 @@ export interface IGradingInfo {
 export interface ICollectionItem {
   card: Record<string, unknown>; // Store full Pokemon card object
   quantity: number;
+  lockedQuantity?: number; // Quantity locked in marketplace listings
   purchasePrice?: number;
-  condition?: 'Raw' | 'LP' | 'MP' | 'HP';
+  condition?: 'Raw' | 'LP' | 'MP' | 'HP' | 'Damaged';
   grading?: IGradingInfo;
   addedAt: Date;
 }
@@ -35,8 +36,9 @@ const GradingInfoSchema = new Schema<IGradingInfo>({
 const CollectionItemSchema = new Schema<ICollectionItem>({
   card: { type: Schema.Types.Mixed, required: true }, // Store full card object
   quantity: { type: Number, required: true, default: 1 },
+  lockedQuantity: { type: Number, default: 0 }, // Quantity locked in marketplace listings
   purchasePrice: { type: Number, required: false },
-  condition: { type: String, enum: ['Raw', 'LP', 'MP', 'HP'], required: false },
+  condition: { type: String, enum: ['Raw', 'LP', 'MP', 'HP', 'Damaged'], required: false },
   grading: { type: GradingInfoSchema, required: false },
   addedAt: { type: Date, default: Date.now },
 });

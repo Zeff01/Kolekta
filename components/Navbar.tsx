@@ -61,6 +61,12 @@ export default function Navbar() {
             >
               Wishlist
             </Link>
+            <Link
+              href="/marketplace"
+              className="px-2 sm:px-4 py-2 text-[10px] sm:text-xs font-pixel uppercase bg-purple-600 text-retro-white border-2 border-retro-black hover:bg-purple-700 transition-colors whitespace-nowrap flex-shrink-0"
+            >
+              Marketplace
+            </Link>
           </div>
 
           {/* Mobile Logo - Centered */}

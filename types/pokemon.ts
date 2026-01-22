@@ -180,3 +180,64 @@ export interface ApiResponse<T> {
   totalCount?: number;
   totalPages?: number;
 }
+
+// Marketplace Types
+export type CardCondition = 'Raw' | 'LP' | 'MP' | 'HP' | 'Damaged';
+export type CardGradingStatus = 'raw' | 'graded';
+
+export interface CardGrading {
+  company: 'PSA' | 'CGC' | 'BGS';
+  grade: string;
+}
+
+export interface PaymentInfo {
+  gcashNumber?: string;
+  gcashQR?: string; // URL to uploaded QR image
+  bankName?: string;
+  bankAccountNumber?: string;
+  bankAccountName?: string;
+}
+
+export interface MarketplaceListing {
+  _id: string;
+  userId: string;
+  seller?: {
+    _id: string;
+    username: string;
+    email: string;
+  };
+  cardId: string;
+  card: PokemonCard;
+  quantity: number;
+  pricePerCard: number; // In PHP
+  condition: CardCondition;
+  gradingStatus: CardGradingStatus;
+  grading?: CardGrading;
+  description?: string;
+  images?: string[]; // URLs to additional photos
+  status: 'active' | 'sold' | 'cancelled';
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Message {
+  _id: string;
+  listingId: string;
+  senderId: string;
+  receiverId: string;
+  message: string;
+  images?: string[]; // URLs to uploaded images (gcash receipt, address, etc)
+  read: boolean;
+  createdAt: string;
+}
+
+export interface MessageThread {
+  listingId: string;
+  listing: MarketplaceListing;
+  otherUser: {
+    _id: string;
+    username: string;
+  };
+  messages: Message[];
+  unreadCount: number;
+}

@@ -6,7 +6,7 @@ import { PokemonCard } from '@/types/pokemon';
 import { useAuth } from '@/contexts/AuthContext';
 
 // Card condition types
-export type CardCondition = 'Raw' | 'LP' | 'MP' | 'HP';
+export type CardCondition = 'Raw' | 'LP' | 'MP' | 'HP' | 'Damaged';
 export type GradingCompany = 'PSA' | 'CGC' | 'BGS';
 export type GradeValue = '10' | '9.5' | '9' | '8.5' | '8' | '7.5' | '7' | '6.5' | '6' | '5.5' | '5' | '4.5' | '4' | '3.5' | '3' | '2.5' | '2' | '1.5' | '1';
 
@@ -19,8 +19,9 @@ interface CollectionItem {
   card: PokemonCard;
   addedAt: string;
   quantity: number;
+  lockedQuantity?: number; // Quantity locked in marketplace listings
   purchasePrice?: number; // Price paid per card
-  condition?: CardCondition; // Card condition (Raw, LP, MP, HP)
+  condition?: CardCondition; // Card condition (Raw, LP, MP, HP, Damaged)
   grading?: GradingInfo; // Grading information (PSA/CGC/BGS + grade)
 }
 
@@ -41,6 +42,7 @@ interface CollectionContextType {
   updateGrading: (cardId: string, grading: GradingInfo | undefined) => void;
   isInCollection: (cardId: string) => boolean;
   getCardQuantity: (cardId: string) => number;
+  getAvailableQuantity?: (cardId: string) => number;
   getCollectionItem: (cardId: string) => CollectionItem | undefined;
 
   // Wishlist
@@ -190,6 +192,13 @@ export function CollectionProvider({ children }: { children: ReactNode }) {
     return item?.quantity || 0;
   };
 
+  // Get available quantity (not locked in marketplace)
+  const getAvailableQuantity = (cardId: string) => {
+    const item = collection.find((item) => item.card.id === cardId);
+    if (!item) return 0;
+    return item.quantity - (item.lockedQuantity || 0);
+  };
+
   const getCollectionItem = (cardId: string) => {
     return collection.find((item) => item.card.id === cardId);
   };
@@ -302,6 +311,7 @@ export function CollectionProvider({ children }: { children: ReactNode }) {
     updateGrading,
     isInCollection,
     getCardQuantity,
+    getAvailableQuantity,
     getCollectionItem,
     wishlist,
     addToWishlist,

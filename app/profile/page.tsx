@@ -4,18 +4,98 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useCollection } from '@/contexts/CollectionContext';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import Image from 'next/image';
+import { Upload, X, Save } from 'lucide-react';
 
 export default function ProfilePage() {
-  const { user, isLoading, isAuthenticated, logout } = useAuth();
+  const { user, isLoading, isAuthenticated, logout, refreshUser } = useAuth();
   const { collection, wishlist } = useCollection();
   const router = useRouter();
+
+  const [gcashNumber, setGcashNumber] = useState('');
+  const [gcashQR, setGcashQR] = useState('');
+  const [bankName, setBankName] = useState('');
+  const [bankAccountNumber, setBankAccountNumber] = useState('');
+  const [bankAccountName, setBankAccountName] = useState('');
+  const [uploading, setUploading] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
       router.push('/login');
     }
   }, [isLoading, isAuthenticated, router]);
+
+  useEffect(() => {
+    if (user?.paymentInfo) {
+      setGcashNumber(user.paymentInfo.gcashNumber || '');
+      setGcashQR(user.paymentInfo.gcashQR || '');
+      setBankName(user.paymentInfo.bankName || '');
+      setBankAccountNumber(user.paymentInfo.bankAccountNumber || '');
+      setBankAccountName(user.paymentInfo.bankAccountName || '');
+    }
+  }, [user]);
+
+  const handleQRUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('type', 'payment');
+
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setGcashQR(data.url);
+      } else {
+        alert('Failed to upload QR code');
+      }
+    } catch (error) {
+      console.error('Error uploading QR:', error);
+      alert('Failed to upload QR code');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleSavePaymentInfo = async () => {
+    setSaving(true);
+    try {
+      const response = await fetch('/api/preferences', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          paymentInfo: {
+            gcashNumber,
+            gcashQR,
+            bankName,
+            bankAccountNumber,
+            bankAccountName,
+          },
+        }),
+      });
+
+      if (response.ok) {
+        alert('Payment information saved successfully!');
+        refreshUser?.();
+      } else {
+        alert('Failed to save payment information');
+      }
+    } catch (error) {
+      console.error('Error saving payment info:', error);
+      alert('Failed to save payment information');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -147,6 +227,126 @@ export default function ProfilePage() {
                 </span>
               </Link>
             </div>
+          </div>
+        </div>
+
+        {/* Payment Information */}
+        <div className="bg-purple-600 dark:bg-purple-500 border-3 border-retro-black shadow-pixel p-6 mb-6">
+          <h2 className="text-sm font-pixel uppercase text-retro-white mb-4 border-b-2 border-retro-white pb-2">
+            Payment Information (For Marketplace)
+          </h2>
+
+          <p className="text-[10px] font-pixel text-retro-white opacity-80 mb-4">
+            This information will be shared with buyers when they contact you about your listings.
+          </p>
+
+          <div className="space-y-4">
+            {/* GCash Section */}
+            <div className="bg-retro-white/10 border-2 border-retro-white/20 p-4">
+              <h3 className="text-xs font-pixel text-retro-white mb-3">GCash</h3>
+
+              <div className="mb-3">
+                <label className="block text-[10px] font-pixel text-retro-white opacity-80 mb-1">
+                  GCash Number
+                </label>
+                <input
+                  type="text"
+                  value={gcashNumber}
+                  onChange={(e) => setGcashNumber(e.target.value)}
+                  placeholder="09XXXXXXXXX"
+                  className="w-full px-3 py-2 border-2 border-retro-black bg-retro-white text-retro-black font-pixel text-xs focus:outline-none focus:ring-2 focus:ring-retro-yellow"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-pixel text-retro-white opacity-80 mb-1">
+                  GCash QR Code
+                </label>
+                {gcashQR ? (
+                  <div className="relative">
+                    <div className="relative w-32 h-32 bg-retro-white border-2 border-retro-black mb-2">
+                      <Image src={gcashQR} alt="GCash QR" fill className="object-contain" sizes="128px" />
+                    </div>
+                    <button
+                      onClick={() => setGcashQR('')}
+                      className="absolute -top-2 -right-2 bg-red-500 border-2 border-retro-black rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600"
+                    >
+                      <X className="w-3 h-3 text-retro-white" />
+                    </button>
+                  </div>
+                ) : (
+                  <label className="block w-32 h-32 border-2 border-dashed border-retro-white bg-retro-white/5 flex flex-col items-center justify-center cursor-pointer hover:bg-retro-white/10 transition-colors">
+                    <Upload className="w-6 h-6 text-retro-white mb-1" />
+                    <span className="text-[8px] font-pixel text-retro-white">
+                      {uploading ? 'Uploading...' : 'Upload QR'}
+                    </span>
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/jpg,image/png,image/webp"
+                      onChange={handleQRUpload}
+                      disabled={uploading}
+                      className="hidden"
+                    />
+                  </label>
+                )}
+              </div>
+            </div>
+
+            {/* Bank Section */}
+            <div className="bg-retro-white/10 border-2 border-retro-white/20 p-4">
+              <h3 className="text-xs font-pixel text-retro-white mb-3">Bank Transfer</h3>
+
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-[10px] font-pixel text-retro-white opacity-80 mb-1">
+                    Bank Name
+                  </label>
+                  <input
+                    type="text"
+                    value={bankName}
+                    onChange={(e) => setBankName(e.target.value)}
+                    placeholder="e.g., BDO, BPI, Metrobank"
+                    className="w-full px-3 py-2 border-2 border-retro-black bg-retro-white text-retro-black font-pixel text-xs focus:outline-none focus:ring-2 focus:ring-retro-yellow"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-pixel text-retro-white opacity-80 mb-1">
+                    Account Number
+                  </label>
+                  <input
+                    type="text"
+                    value={bankAccountNumber}
+                    onChange={(e) => setBankAccountNumber(e.target.value)}
+                    placeholder="1234567890"
+                    className="w-full px-3 py-2 border-2 border-retro-black bg-retro-white text-retro-black font-pixel text-xs focus:outline-none focus:ring-2 focus:ring-retro-yellow"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-pixel text-[10px] text-retro-white opacity-80 mb-1">
+                    Account Name
+                  </label>
+                  <input
+                    type="text"
+                    value={bankAccountName}
+                    onChange={(e) => setBankAccountName(e.target.value)}
+                    placeholder="Juan Dela Cruz"
+                    className="w-full px-3 py-2 border-2 border-retro-black bg-retro-white text-retro-black font-pixel text-xs focus:outline-none focus:ring-2 focus:ring-retro-yellow"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Save Button */}
+            <button
+              onClick={handleSavePaymentInfo}
+              disabled={saving}
+              className="w-full bg-retro-yellow border-2 border-retro-black px-4 py-3 shadow-pixel hover:shadow-pixel-lg transition-all font-pixel text-xs text-retro-black uppercase disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            >
+              <Save className="w-4 h-4" />
+              {saving ? 'Saving...' : 'Save Payment Information'}
+            </button>
           </div>
         </div>
 

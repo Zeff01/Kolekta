@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { currency } = await request.json();
+    const { currency, paymentInfo } = await request.json();
 
     if (currency && currency !== 'USD' && currency !== 'PHP') {
       return NextResponse.json(
@@ -74,10 +74,15 @@ export async function POST(request: NextRequest) {
       user.currency = currency;
     }
 
+    if (paymentInfo !== undefined) {
+      user.paymentInfo = paymentInfo;
+    }
+
     await user.save();
 
     return NextResponse.json({
       currency: user.currency,
+      paymentInfo: user.paymentInfo,
     });
   } catch (error) {
     console.error('Update preferences error:', error);
