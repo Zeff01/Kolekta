@@ -1,5 +1,5 @@
 {
-  "name": "kolekta",
+  "name": "kolekta-korner",
   "version": "1.0.0",
   "scripts": {
     "dev": "next dev -p 3005",

@@ -2,7 +2,7 @@ import { pokemonAPI } from "@/lib/pokemon-api";
 import CardsPageClient from "@/components/pokemon/CardsPageClient";
 
 export const metadata = {
-  title: "Pokemon Cards | Kolekta",
+  title: "Pokemon Cards | Kolekta Korner",
   description: "Browse and search Pokemon Trading Card Game cards",
 };
 

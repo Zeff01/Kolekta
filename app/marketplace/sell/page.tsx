@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCollection } from '@/contexts/CollectionContext';
+import { useToast } from '@/contexts/ToastContext';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Store, Upload, X } from 'lucide-react';
@@ -11,10 +12,14 @@ import { CardCondition, CardGrading} from '@/types/pokemon';
 export default function SellPage() {
   const { isAuthenticated, isLoading: authLoading } = useAuth();
   const { collection, isLoaded } = useCollection();
+  const toast = useToast();
   const router = useRouter();
 
   const [selectedCardId, setSelectedCardId] = useState('');
   const [quantity, setQuantity] = useState(1);
+  const [pricingMode, setPricingMode] = useState<'market' | 'custom'>('market');
+  const [marketPrice, setMarketPrice] = useState<number | null>(null);
+  const [markupPercentage, setMarkupPercentage] = useState(0);
   const [pricePerCard, setPricePerCard] = useState('');
   const [condition, setCondition] = useState<CardCondition>('Raw');
   const [gradingStatus, setGradingStatus] = useState<'raw' | 'graded'>('raw');
@@ -35,6 +40,57 @@ export default function SellPage() {
     ? selectedCard.quantity - (selectedCard.lockedQuantity || 0)
     : 0;
 
+  // Fetch market price when card is selected
+  useEffect(() => {
+    const fetchMarketPrice = async () => {
+      if (!selectedCard) {
+        setMarketPrice(null);
+        return;
+      }
+
+      // Get market price from card's TCGPlayer data
+      const tcgPrice = selectedCard.card.tcgplayer?.prices?.normal?.market ||
+                       selectedCard.card.tcgplayer?.prices?.holofoil?.market ||
+                       selectedCard.card.tcgplayer?.prices?.reverseHolofoil?.market ||
+                       selectedCard.card.tcgplayer?.prices?.['1stEditionHolofoil']?.market;
+
+      if (tcgPrice) {
+        // Convert USD to PHP (approximate rate: 1 USD = 56.50 PHP)
+        const phpPrice = tcgPrice * 56.50;
+        setMarketPrice(phpPrice);
+
+        // If in market mode, set the price
+        if (pricingMode === 'market') {
+          const finalPrice = phpPrice * (1 + markupPercentage / 100);
+          setPricePerCard(finalPrice.toFixed(2));
+        }
+      } else {
+        setMarketPrice(null);
+      }
+    };
+
+    fetchMarketPrice();
+  }, [selectedCard, pricingMode, markupPercentage]);
+
+  // Update price when markup changes in market mode
+  useEffect(() => {
+    if (pricingMode === 'market' && marketPrice) {
+      const finalPrice = marketPrice * (1 + markupPercentage / 100);
+      setPricePerCard(finalPrice.toFixed(2));
+    }
+  }, [markupPercentage, marketPrice, pricingMode]);
+
+  // Clear custom price when switching to market mode
+  const handlePricingModeChange = (mode: 'market' | 'custom') => {
+    setPricingMode(mode);
+    if (mode === 'market' && marketPrice) {
+      const finalPrice = marketPrice * (1 + markupPercentage / 100);
+      setPricePerCard(finalPrice.toFixed(2));
+    } else if (mode === 'custom') {
+      setPricePerCard('');
+    }
+  };
+
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -53,12 +109,13 @@ export default function SellPage() {
       if (response.ok) {
         const data = await response.json();
         setImages([...images, data.url]);
+        toast.success('Image uploaded successfully');
       } else {
-        alert('Failed to upload image');
+        toast.error('Failed to upload image');
       }
     } catch (error) {
       console.error('Error uploading image:', error);
-      alert('Failed to upload image');
+      toast.error('Failed to upload image');
     } finally {
       setUploading(false);
     }
@@ -72,17 +129,17 @@ export default function SellPage() {
     e.preventDefault();
 
     if (!selectedCard) {
-      alert('Please select a card');
+      toast.warning('Please select a card');
       return;
     }
 
     if (quantity > availableQuantity) {
-      alert(`Only ${availableQuantity} available to list`);
+      toast.warning(`Only ${availableQuantity} available to list`);
       return;
     }
 
     if (!pricePerCard || parseFloat(pricePerCard) <= 0) {
-      alert('Please enter a valid price');
+      toast.warning('Please enter a valid price');
       return;
     }
 
@@ -105,15 +162,15 @@ export default function SellPage() {
       });
 
       if (response.ok) {
-        alert('Listing created successfully!');
+        toast.success('Listing created successfully!');
         router.push('/marketplace/my-shop');
       } else {
         const data = await response.json();
-        alert(data.error || 'Failed to create listing');
+        toast.error(data.error || 'Failed to create listing');
       }
     } catch (error) {
       console.error('Error creating listing:', error);
-      alert('Failed to create listing');
+      toast.error('Failed to create listing');
     } finally {
       setSubmitting(false);
     }
@@ -220,28 +277,102 @@ export default function SellPage() {
               </div>
             )}
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-              {/* Quantity */}
-              <div>
-                <label className="block font-pixel text-xs text-retro-black dark:text-retro-white mb-2">
-                  Quantity *
-                </label>
-                <input
-                  type="number"
-                  min="1"
-                  max={availableQuantity}
-                  value={quantity}
-                  onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
-                  required
-                  disabled={!selectedCard}
-                  className="w-full px-3 py-2 border-2 border-retro-black bg-retro-white dark:bg-retro-black text-retro-black dark:text-retro-white font-pixel text-xs focus:outline-none focus:ring-2 focus:ring-retro-blue disabled:opacity-50"
-                />
-              </div>
+            {/* Quantity */}
+            <div className="mb-6">
+              <label className="block font-pixel text-xs text-retro-black dark:text-retro-white mb-2">
+                Quantity *
+              </label>
+              <input
+                type="number"
+                min="1"
+                max={availableQuantity}
+                value={quantity}
+                onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
+                required
+                disabled={!selectedCard}
+                className="w-full px-3 py-2 border-2 border-retro-black bg-retro-white dark:bg-retro-black text-retro-black dark:text-retro-white font-pixel text-xs focus:outline-none focus:ring-2 focus:ring-retro-blue disabled:opacity-50"
+              />
+            </div>
 
-              {/* Price Per Card (PHP) */}
-              <div>
+            {/* Pricing Mode Selector */}
+            <div className="mb-6">
+              <label className="block font-pixel text-xs text-retro-black dark:text-retro-white mb-2">
+                Pricing Method *
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => handlePricingModeChange('market')}
+                  disabled={!selectedCard || !marketPrice}
+                  className={`px-4 py-3 border-2 border-retro-black font-pixel text-xs uppercase transition-all ${
+                    pricingMode === 'market'
+                      ? 'bg-retro-blue text-retro-white shadow-pixel'
+                      : 'bg-retro-white dark:bg-retro-black text-retro-black dark:text-retro-white hover:bg-retro-gray-light dark:hover:bg-retro-gray-dark'
+                  } disabled:opacity-50 disabled:cursor-not-allowed`}
+                >
+                  Market Price
+                  {!marketPrice && selectedCard && (
+                    <span className="block text-[8px] mt-1 normal-case">No market data</span>
+                  )}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handlePricingModeChange('custom')}
+                  disabled={!selectedCard}
+                  className={`px-4 py-3 border-2 border-retro-black font-pixel text-xs uppercase transition-all ${
+                    pricingMode === 'custom'
+                      ? 'bg-retro-blue text-retro-white shadow-pixel'
+                      : 'bg-retro-white dark:bg-retro-black text-retro-black dark:text-retro-white hover:bg-retro-gray-light dark:hover:bg-retro-gray-dark'
+                  } disabled:opacity-50 disabled:cursor-not-allowed`}
+                >
+                  Custom Price
+                </button>
+              </div>
+            </div>
+
+            {/* Market Price Info & Markup */}
+            {pricingMode === 'market' && marketPrice && (
+              <div className="mb-6 p-4 bg-retro-blue border-2 border-retro-black">
+                <div className="mb-3">
+                  <p className="font-pixel text-[9px] text-retro-white opacity-80 mb-1">
+                    TCG Market Price (USD → PHP)
+                  </p>
+                  <p className="font-pixel text-sm text-retro-white">
+                    ₱{marketPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block font-pixel text-[9px] text-retro-white mb-2">
+                    Markup Percentage (0% = Market Price)
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="range"
+                      min="0"
+                      max="100"
+                      step="5"
+                      value={markupPercentage}
+                      onChange={(e) => setMarkupPercentage(parseInt(e.target.value))}
+                      className="flex-1"
+                    />
+                    <span className="font-pixel text-xs text-retro-white w-12 text-right">
+                      {markupPercentage}%
+                    </span>
+                  </div>
+                  <p className="font-pixel text-[8px] text-retro-white opacity-70 mt-2">
+                    Your Price: ₱{pricePerCard}
+                    {markupPercentage > 0 && ` (+${markupPercentage}% above market)`}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Custom Price Input */}
+            {pricingMode === 'custom' && (
+              <div className="mb-6">
                 <label className="block font-pixel text-xs text-retro-black dark:text-retro-white mb-2">
-                  Price Per Card (₱) *
+                  Custom Price Per Card (₱) *
                 </label>
                 <input
                   type="number"
@@ -253,8 +384,13 @@ export default function SellPage() {
                   required
                   className="w-full px-3 py-2 border-2 border-retro-black bg-retro-white dark:bg-retro-black text-retro-black dark:text-retro-white font-pixel text-xs focus:outline-none focus:ring-2 focus:ring-retro-blue"
                 />
+                {marketPrice && (
+                  <p className="font-pixel text-[9px] text-retro-gray-light dark:text-retro-gray-dark mt-2">
+                    Market Price: ₱{marketPrice.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                  </p>
+                )}
               </div>
-            </div>
+            )}
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
               {/* Condition */}

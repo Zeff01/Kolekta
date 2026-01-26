@@ -7,7 +7,6 @@ import { MarketplaceListing } from '@/types/pokemon';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Store, Package, Edit, Trash2, X, Check } from 'lucide-react';
-import { useCurrency } from '@/contexts/CurrencyContext';
 
 export default function MyShopPage() {
   const { isAuthenticated, isLoading: authLoading } = useAuth();
@@ -15,7 +14,6 @@ export default function MyShopPage() {
   const [listings, setListings] = useState<MarketplaceListing[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'active' | 'sold' | 'cancelled'>('active');
-  const { convertPrice, currency } = useCurrency();
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -84,9 +82,8 @@ export default function MyShopPage() {
   };
 
   const formatPrice = (priceInPHP: number) => {
-    const converted = convertPrice(priceInPHP, 'PHP');
-    const symbol = currency === 'PHP' ? '₱' : '$';
-    return `${symbol}${converted.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    // Marketplace prices are always stored in PHP, display as-is
+    return `₱${priceInPHP.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   };
 
   const filteredListings = listings.filter((l) => l.status === activeTab);

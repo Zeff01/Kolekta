@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import dbConnect from '@/lib/mongodb';
+import { connectToDatabase } from '@/lib/mongodb';
 import MarketplaceListing from '@/models/MarketplaceListing';
 import UserCollection from '@/models/UserCollection';
 import { getUserFromRequest } from '@/lib/auth';
@@ -7,7 +7,7 @@ import { getUserFromRequest } from '@/lib/auth';
 // GET /api/marketplace - Get all active listings with filters
 export async function GET(request: NextRequest) {
   try {
-    await dbConnect();
+    await connectToDatabase();
 
     const { searchParams } = new URL(request.url);
     const search = searchParams.get('search') || '';
@@ -79,7 +79,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    await dbConnect();
+    await connectToDatabase();
 
     const body = await request.json();
     const {

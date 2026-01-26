@@ -38,6 +38,8 @@ const config: Config = {
         'blink': 'blink 1s step-end infinite',
         'pixel-pulse': 'pixel-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
         'spin-slow': 'spin 3s linear infinite',
+        'slide-in-right': 'slide-in-right 0.3s ease-out',
+        'fade-out': 'fade-out 0.2s ease-in',
       },
       keyframes: {
         blink: {
@@ -47,6 +49,14 @@ const config: Config = {
         'pixel-pulse': {
           '0%, 100%': { transform: 'scale(1)' },
           '50%': { transform: 'scale(1.05)' },
+        },
+        'slide-in-right': {
+          '0%': { transform: 'translateX(100%)', opacity: '0' },
+          '100%': { transform: 'translateX(0)', opacity: '1' },
+        },
+        'fade-out': {
+          '0%': { opacity: '1' },
+          '100%': { opacity: '0' },
         },
       },
       boxShadow: {

@@ -332,9 +332,16 @@ class PokemonTCGAPI {
     const startTime = Date.now();
 
     try {
-      const response = await PokemonTCG.findSetsByQueries({
+      // Add timeout promise
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(() => reject(new Error('Request timeout after 10 seconds')), 10000);
+      });
+
+      const fetchPromise = PokemonTCG.findSetsByQueries({
         orderBy: '-releaseDate', // Newest first
       });
+
+      const response = await Promise.race([fetchPromise, timeoutPromise]);
 
       const duration = Date.now() - startTime;
       console.log(`[PokemonTCG API] Success - Retrieved ${response.length} sets in ${duration}ms`);
@@ -352,8 +359,14 @@ class PokemonTCGAPI {
 
       return result;
     } catch (error) {
-      console.error('[PokemonTCG API] Error fetching sets:', error);
-      throw error;
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      console.warn(`[PokemonTCG API] Failed to fetch sets: ${errorMessage}`);
+      // Return empty result instead of throwing
+      return {
+        data: [],
+        count: 0,
+        totalCount: 0,
+      };
     }
   }
 

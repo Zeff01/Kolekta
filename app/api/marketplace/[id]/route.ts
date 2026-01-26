@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import dbConnect from '@/lib/mongodb';
+import { connectToDatabase } from '@/lib/mongodb';
 import MarketplaceListing from '@/models/MarketplaceListing';
 import UserCollection from '@/models/UserCollection';
 import { getUserFromRequest } from '@/lib/auth';
@@ -10,7 +10,7 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    await dbConnect();
+    await connectToDatabase();
 
     const listing = await MarketplaceListing.findById(params.id)
       .populate('userId', 'username email paymentInfo')
@@ -44,7 +44,7 @@ export async function PATCH(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    await dbConnect();
+    await connectToDatabase();
 
     const listing = await MarketplaceListing.findById(params.id);
 
@@ -122,7 +122,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    await dbConnect();
+    await connectToDatabase();
 
     const listing = await MarketplaceListing.findById(params.id);
 

@@ -5,11 +5,12 @@ import CacheStatus from "@/components/dev/CacheStatus";
 import { CollectionProvider } from "@/contexts/CollectionContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { CurrencyProvider } from "@/contexts/CurrencyContext";
+import { ToastProvider } from "@/contexts/ToastContext";
 import Navbar from "@/components/Navbar";
 
 export const metadata: Metadata = {
-  title: "Kolekta - Pokemon TCG Collector",
-  description: "Browse, collect, and track your Pokemon TCG cards with Kolekta",
+  title: "Kolekta Korner - Pokemon TCG Collector",
+  description: "Browse, collect, and track your Pokemon TCG cards with Kolekta Korner",
 };
 
 export default function RootLayout({
@@ -24,9 +25,11 @@ export default function RootLayout({
           <AuthProvider>
             <CurrencyProvider>
               <CollectionProvider>
-                <Navbar />
-                <main className="min-h-screen">{children}</main>
-                <CacheStatus />
+                <ToastProvider>
+                  <Navbar />
+                  <main className="min-h-screen">{children}</main>
+                  <CacheStatus />
+                </ToastProvider>
               </CollectionProvider>
             </CurrencyProvider>
           </AuthProvider>

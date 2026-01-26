@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import dbConnect from '@/lib/mongodb';
+import { connectToDatabase } from '@/lib/mongodb';
 import Message from '@/models/Message';
 import MarketplaceListing from '@/models/MarketplaceListing';
 import { getUserFromRequest } from '@/lib/auth';
@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    await dbConnect();
+    await connectToDatabase();
 
     const { searchParams } = new URL(request.url);
     const listingId = searchParams.get('listingId');
@@ -97,7 +97,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    await dbConnect();
+    await connectToDatabase();
 
     const body = await request.json();
     const { listingId, receiverId, message, images } = body;

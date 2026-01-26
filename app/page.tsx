@@ -45,11 +45,22 @@ export default async function Home() {
             View All &gt;&gt;
           </Link>
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
-          {sets.map((set, index) => (
-            <SetCard key={set.id} set={set} index={index} />
-          ))}
-        </div>
+        {sets.length === 0 ? (
+          <div className="text-center py-12 px-4 bg-retro-yellow border-2 border-retro-black">
+            <p className="text-xs font-pixel text-retro-black mb-2">
+              Unable to load sets at the moment
+            </p>
+            <p className="text-[10px] font-pixel text-retro-gray">
+              The Pokemon TCG API may be experiencing issues. Please try again later.
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
+            {sets.map((set, index) => (
+              <SetCard key={set.id} set={set} index={index} />
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Action Cards */}

@@ -5,7 +5,6 @@ import { MarketplaceListing } from '@/types/pokemon';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Search, Filter, Store, TrendingUp, Package } from 'lucide-react';
-import { useCurrency } from '@/contexts/CurrencyContext';
 
 export default function MarketplacePage() {
   const [listings, setListings] = useState<MarketplaceListing[]>([]);
@@ -15,7 +14,6 @@ export default function MarketplacePage() {
   const [conditionFilter, setConditionFilter] = useState('');
   const [gradingFilter, setGradingFilter] = useState('');
   const [sortBy, setSortBy] = useState('newest');
-  const { convertPrice, currency } = useCurrency();
 
   useEffect(() => {
     fetchListings();
@@ -72,9 +70,8 @@ export default function MarketplacePage() {
   };
 
   const formatPrice = (priceInPHP: number) => {
-    const converted = convertPrice(priceInPHP, 'PHP');
-    const symbol = currency === 'PHP' ? '₱' : '$';
-    return `${symbol}${converted.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    // Marketplace prices are always stored in PHP, display as-is
+    return `₱${priceInPHP.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   };
 
   if (loading) {

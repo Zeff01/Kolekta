@@ -2,7 +2,7 @@ import { pokemonAPI } from "@/lib/pokemon-api";
 import SetsPageClient from "@/components/pokemon/SetsPageClient";
 
 export const metadata = {
-  title: "Pokemon TCG Sets | Kolekta",
+  title: "Pokemon TCG Sets | Kolekta Korner",
   description: "Browse all Pokemon Trading Card Game sets",
 };
 

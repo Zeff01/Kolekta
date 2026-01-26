@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import { useCurrency } from '@/contexts/CurrencyContext';
 import { MarketplaceListing, Message } from '@/types/pokemon';
 import Image from 'next/image';
 import {  Store, Send, Upload, X, Copy, Check } from 'lucide-react';
@@ -12,7 +11,6 @@ export default function ListingDetailPage() {
   const params = useParams();
   const router = useRouter();
   const { user, isAuthenticated } = useAuth();
-  const { convertPrice, currency } = useCurrency();
 
   const [listing, setListing] = useState<MarketplaceListing | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -136,9 +134,8 @@ export default function ListingDetailPage() {
   };
 
   const formatPrice = (priceInPHP: number) => {
-    const converted = convertPrice(priceInPHP, 'PHP');
-    const symbol = currency === 'PHP' ? '₱' : '$';
-    return `${symbol}${converted.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    // Marketplace prices are always stored in PHP, display as-is
+    return `₱${priceInPHP.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   };
 
   const copyToClipboard = (text: string, field: string) => {

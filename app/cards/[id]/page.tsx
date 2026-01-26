@@ -25,7 +25,7 @@ export async function generateMetadata({ params }: CardDetailPageProps) {
   const { data: card } = await pokemonAPI.getCard(id);
 
   return {
-    title: `${card.name} - ${card.set.name} | Kolekta`,
+    title: `${card.name} - ${card.set.name} | Kolekta Korner`,
     description: `View details for ${card.name} from the ${card.set.name} set`,
   };
 }
