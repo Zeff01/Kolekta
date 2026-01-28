@@ -1,27 +1,43 @@
 'use client';
 
 import { useState } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
-import { Eye, EyeOff } from 'lucide-react';
+import { useToast } from '@/contexts/ToastContext';
 
-export default function LoginPage() {
-  const { login } = useAuth();
+export default function ForgotPasswordPage() {
+  const toast = useToast();
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
+  const [resetUrl, setResetUrl] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
     setIsLoading(true);
+    setResetUrl(null);
 
     try {
-      await login(email, password);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Login failed');
+      const response = await fetch('/api/auth/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        toast.success('Password reset instructions sent! Check your email.');
+
+        // In development, show the reset URL
+        if (data.resetUrl) {
+          setResetUrl(data.resetUrl);
+        }
+
+        setEmail('');
+      } else {
+        toast.error(data.error || 'Failed to send reset email');
+      }
+    } catch (error) {
+      toast.error('An error occurred. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -33,14 +49,14 @@ export default function LoginPage() {
         {/* Header */}
         <div className="text-center mb-8">
           <div className="bg-retro-black dark:bg-retro-white text-retro-white dark:text-retro-black px-6 py-4 border-3 border-retro-black shadow-pixel mb-6 inline-block">
-            <h1 className="text-xl font-pixel uppercase">Trainer Login</h1>
+            <h1 className="text-xl font-pixel uppercase">Forgot Password</h1>
           </div>
           <p className="text-xs font-pixel text-retro-gray dark:text-retro-gray-light">
-            Welcome back, Trainer!
+            Enter your email to reset your password
           </p>
         </div>
 
-        {/* Login Form */}
+        {/* Forgot Password Form */}
         <div className="bg-retro-white dark:bg-retro-black border-3 border-retro-black shadow-pixel p-6">
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Email */}
@@ -58,42 +74,6 @@ export default function LoginPage() {
               />
             </div>
 
-            {/* Password */}
-            <div>
-              <label className="block text-xs font-pixel text-retro-black dark:text-retro-white mb-2 uppercase">
-                Password
-              </label>
-              <div className="relative">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  minLength={6}
-                  className="w-full px-3 py-2 pr-10 border-2 border-retro-black bg-retro-white dark:bg-retro-gray-dark text-retro-black dark:text-retro-white font-pixel text-xs focus:outline-none focus:border-retro-blue"
-                  placeholder="••••••••"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-retro-gray dark:text-retro-gray-light hover:text-retro-black dark:hover:text-retro-white"
-                >
-                  {showPassword ? (
-                    <EyeOff size={16} />
-                  ) : (
-                    <Eye size={16} />
-                  )}
-                </button>
-              </div>
-            </div>
-
-            {/* Error Message */}
-            {error && (
-              <div className="bg-retro-red border-2 border-retro-black p-3">
-                <p className="text-xs font-pixel text-retro-white">{error}</p>
-              </div>
-            )}
-
             {/* Submit Button */}
             <button
               type="submit"
@@ -101,30 +81,35 @@ export default function LoginPage() {
               className="w-full px-6 py-3 bg-retro-blue text-retro-white border-3 border-retro-black shadow-pixel hover:shadow-pixel-lg transition-all hover:translate-x-1 hover:translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <span className="text-xs font-pixel uppercase">
-                {isLoading ? 'Logging in...' : 'Login'}
+                {isLoading ? 'Sending...' : 'Send Reset Link'}
               </span>
             </button>
           </form>
 
-          {/* Forgot Password Link */}
-          <div className="mt-4 text-center">
-            <Link
-              href="/forgot-password"
-              className="text-xs font-pixel text-retro-blue hover:underline"
-            >
-              Forgot password?
-            </Link>
-          </div>
+          {/* Development: Show reset URL */}
+          {resetUrl && (
+            <div className="mt-4 p-3 bg-retro-yellow border-2 border-retro-black">
+              <p className="text-xs font-pixel text-retro-black mb-2 uppercase">
+                Development Mode - Reset Link:
+              </p>
+              <Link
+                href={resetUrl.replace(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3005', '')}
+                className="text-xs font-pixel text-retro-blue hover:underline break-all"
+              >
+                Click here to reset password
+              </Link>
+            </div>
+          )}
 
-          {/* Signup Link */}
+          {/* Back to Login Link */}
           <div className="mt-6 text-center">
             <p className="text-xs font-pixel text-retro-gray dark:text-retro-gray-light">
-              Don't have an account?{' '}
+              Remember your password?{' '}
               <Link
-                href="/signup"
+                href="/login"
                 className="text-retro-blue hover:underline"
               >
-                Sign up here
+                Login here
               </Link>
             </p>
           </div>
