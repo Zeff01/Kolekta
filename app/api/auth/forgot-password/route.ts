@@ -50,8 +50,8 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       message: 'If an account exists with this email, a password reset link will be sent.',
-      // Remove this in production! Only for testing without email service
-      ...(process.env.NODE_ENV === 'development' && { resetUrl }),
+      // Always return URL until email service is configured
+      resetUrl,
     });
   } catch (error) {
     console.error('Forgot password error:', error);

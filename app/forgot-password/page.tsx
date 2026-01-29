@@ -25,11 +25,12 @@ export default function ForgotPasswordPage() {
       const data = await response.json();
 
       if (response.ok) {
-        toast.success('Password reset instructions sent! Check your email.');
-
-        // In development, show the reset URL
+        // Show the reset URL if available (no email service configured yet)
         if (data.resetUrl) {
           setResetUrl(data.resetUrl);
+          toast.success('Password reset link generated! Click the link below.');
+        } else {
+          toast.success('Password reset instructions sent! Check your email.');
         }
 
         setEmail('');
@@ -86,17 +87,22 @@ export default function ForgotPasswordPage() {
             </button>
           </form>
 
-          {/* Development: Show reset URL */}
+          {/* Show reset URL (no email service configured) */}
           {resetUrl && (
-            <div className="mt-4 p-3 bg-retro-yellow border-2 border-retro-black">
-              <p className="text-xs font-pixel text-retro-black mb-2 uppercase">
-                Development Mode - Reset Link:
+            <div className="mt-4 p-4 bg-retro-green border-3 border-retro-black shadow-pixel">
+              <p className="text-xs font-pixel text-retro-black mb-3 uppercase font-bold">
+                ⚠️ Password Reset Link Generated
+              </p>
+              <p className="text-xs font-pixel text-retro-black mb-3">
+                Email service not configured yet. Click the button below to reset your password:
               </p>
               <Link
                 href={resetUrl.replace(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3005', '')}
-                className="text-xs font-pixel text-retro-blue hover:underline break-all"
+                className="block w-full px-4 py-3 bg-retro-blue text-retro-white border-3 border-retro-black shadow-pixel hover:shadow-pixel-lg transition-all hover:translate-x-1 hover:translate-y-1 text-center"
               >
-                Click here to reset password
+                <span className="text-xs font-pixel uppercase">
+                  Reset My Password
+                </span>
               </Link>
             </div>
           )}
