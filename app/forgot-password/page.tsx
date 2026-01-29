@@ -96,11 +96,11 @@ export default function ForgotPasswordPage() {
 
           {/* Show reset URL (no email service configured) */}
           {resetUrl && (
-            <div className="mt-4 p-4 bg-retro-green border-3 border-retro-black shadow-pixel">
-              <p className="text-xs font-pixel text-retro-black mb-3 uppercase font-bold">
+            <div className="mt-4 p-4 bg-retro-yellow border-3 border-retro-black shadow-pixel">
+              <p className="text-xs font-pixel text-retro-black dark:text-retro-black mb-3 uppercase font-bold">
                 ⚠️ Password Reset Link Generated
               </p>
-              <p className="text-xs font-pixel text-retro-black mb-3">
+              <p className="text-xs font-pixel text-retro-black dark:text-retro-black mb-3">
                 Email service not configured yet. Click the button below to reset your password:
               </p>
               <Link
