@@ -12,21 +12,26 @@ export default function ForgotPasswordPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('Form submitted with email:', email);
     setIsLoading(true);
     setResetUrl(null);
 
     try {
+      console.log('Fetching forgot password API...');
       const response = await fetch('/api/auth/forgot-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
       });
 
+      console.log('Response status:', response.status);
       const data = await response.json();
+      console.log('Response data:', data);
 
       if (response.ok) {
         // Show the reset URL if available (no email service configured yet)
         if (data.resetUrl) {
+          console.log('Setting reset URL:', data.resetUrl);
           setResetUrl(data.resetUrl);
           toast.success('Password reset link generated! Click the link below.');
         } else {
@@ -35,9 +40,11 @@ export default function ForgotPasswordPage() {
 
         setEmail('');
       } else {
+        console.error('API error:', data.error);
         toast.error(data.error || 'Failed to send reset email');
       }
     } catch (error) {
+      console.error('Fetch error:', error);
       toast.error('An error occurred. Please try again.');
     } finally {
       setIsLoading(false);
