@@ -1,4 +1,3 @@
-import { pokemonAPI } from "@/lib/pokemon-api";
 import SetsPageClient from "@/components/pokemon/SetsPageClient";
 
 export const metadata = {
@@ -6,11 +5,10 @@ export const metadata = {
   description: "Browse all Pokemon Trading Card Game sets",
 };
 
-// Enable ISR - revalidate every 7 days (new sets are rare)
-export const revalidate = 604800;
+// Force dynamic rendering to avoid build-time API calls
+export const dynamic = 'force-dynamic';
 
 export default async function SetsPage() {
-  const { data: sets } = await pokemonAPI.getSets({ pageSize: 500 });
-
-  return <SetsPageClient sets={sets} />;
+  // Start with empty sets - client will fetch on mount
+  return <SetsPageClient sets={[]} />;
 }
