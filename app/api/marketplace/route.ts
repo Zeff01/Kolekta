@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
 import MarketplaceListing from '@/models/MarketplaceListing';
-import UserCollection from '@/models/UserCollection';
+import UserCollection, { ICollectionItem } from '@/models/UserCollection';
 import { getUserFromRequest } from '@/lib/auth';
 
 // GET /api/marketplace - Get all active listings with filters
@@ -39,9 +39,10 @@ export async function GET(request: NextRequest) {
     }
 
     if (minPrice || maxPrice) {
-      query.pricePerCard = {};
-      if (minPrice) query.pricePerCard.$gte = parseFloat(minPrice);
-      if (maxPrice) query.pricePerCard.$lte = parseFloat(maxPrice);
+      const priceFilter: { $gte?: number; $lte?: number } = {};
+      if (minPrice) priceFilter.$gte = parseFloat(minPrice);
+      if (maxPrice) priceFilter.$lte = parseFloat(maxPrice);
+      query.pricePerCard = priceFilter;
     }
 
     if (userId) {
@@ -113,7 +114,7 @@ export async function POST(request: NextRequest) {
     }
 
     const collectionItem = userCollection.collection.find(
-      (item: { card: { id: string } }) => item.card.id === cardId
+      (item: ICollectionItem) => (item.card as { id: string }).id === cardId
     );
 
     if (!collectionItem) {

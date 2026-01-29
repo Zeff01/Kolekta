@@ -205,6 +205,13 @@ export interface MarketplaceListing {
     _id: string;
     username: string;
     email: string;
+    paymentInfo?: {
+      gcashNumber?: string;
+      gcashQR?: string;
+      bankName?: string;
+      bankAccountNumber?: string;
+      bankAccountName?: string;
+    };
   };
   cardId: string;
   card: PokemonCard;
@@ -223,7 +230,10 @@ export interface MarketplaceListing {
 export interface Message {
   _id: string;
   listingId: string;
-  senderId: string;
+  senderId: {
+    _id: string;
+    username: string;
+  };
   receiverId: string;
   message: string;
   images?: string[]; // URLs to uploaded images (gcash receipt, address, etc)

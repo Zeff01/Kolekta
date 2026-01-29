@@ -49,10 +49,11 @@ export default function SellPage() {
       }
 
       // Get market price from card's TCGPlayer data
+      const prices = selectedCard.card.tcgplayer?.prices as Record<string, { market?: number }> | undefined;
       const tcgPrice = selectedCard.card.tcgplayer?.prices?.normal?.market ||
                        selectedCard.card.tcgplayer?.prices?.holofoil?.market ||
                        selectedCard.card.tcgplayer?.prices?.reverseHolofoil?.market ||
-                       selectedCard.card.tcgplayer?.prices?.['1stEditionHolofoil']?.market;
+                       prices?.['1stEditionHolofoil']?.market;
 
       if (tcgPrice) {
         // Convert USD to PHP (approximate rate: 1 USD = 56.50 PHP)

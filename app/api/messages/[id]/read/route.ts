@@ -6,7 +6,7 @@ import { getUserFromRequest } from '@/lib/auth';
 // PATCH /api/messages/[id]/read - Mark a message as read
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const user = await getUserFromRequest(request);
@@ -16,7 +16,9 @@ export async function PATCH(
 
     await connectToDatabase();
 
-    const message = await Message.findById(params.id);
+    const { id } = await params;
+
+    const message = await Message.findById(id);
 
     if (!message) {
       return NextResponse.json(

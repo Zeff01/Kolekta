@@ -144,7 +144,7 @@ export default function ListingDetailPage() {
     setTimeout(() => setCopiedField(null), 2000);
   };
 
-  const isOwnListing = listing && user && listing.userId === user._id;
+  const isOwnListing = listing && user && listing.userId === user.id;
 
   if (loading) {
     return (
@@ -393,7 +393,7 @@ export default function ListingDetailPage() {
                     </div>
                   ) : (
                     messages.map((msg) => {
-                      const isOwn = msg.senderId._id === user._id;
+                      const isOwn = msg.senderId._id === user?.id;
                       return (
                         <div key={msg._id} className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}>
                           <div

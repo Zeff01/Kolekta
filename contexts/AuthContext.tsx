@@ -8,6 +8,13 @@ interface User {
   email: string;
   username: string;
   createdAt?: string;
+  paymentInfo?: {
+    gcashNumber?: string;
+    gcashQR?: string;
+    bankName?: string;
+    bankAccountNumber?: string;
+    bankAccountName?: string;
+  };
 }
 
 interface AuthContextType {
